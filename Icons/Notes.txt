@@ -1,0 +1,4 @@
+All icons are taken from flaticon.com 
+They are from the section Interface Icons 
+They were picked with the Regular stroke width and Rounded corner filters
+And they are 32 x 32 pixels
