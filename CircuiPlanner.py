@@ -29,7 +29,7 @@ class PixelArtApp:
         self.move_button.pack(padx=4, pady=10)
         
         # Point button
-        self.point_button = tk.Button(self.toolbar, image=self.point_icon, command=self.point_mode, bg="lightgray", relief="flat")
+        self.point_button = tk.Button(self.toolbar, image=self.point_icon, command=self.point_mode, bg="lightgray", relief="groove")
         self.point_button.pack(padx=4, pady=10)
         
         # Add button
@@ -144,19 +144,40 @@ class PixelArtApp:
         return ImageTk.PhotoImage(img)
     
     
+    def update_toolbar(self):
+        self.load_icons()
+        
+        self.move_button.config(image=self.move_icon, relief="flat")
+        self.point_button.config(image=self.point_icon, relief="flat")
+        self.add_button.config(image=self.add_icon, relief="flat")
+        self.line_button.config(image=self.line_icon, relief="flat")
+        self.erase_button.config(image=self.erase_icon, relief="flat")
+        self.color_button.config(image=self.color_icon, relief="flat")
+        self.colorpick_button.config(image=self.colorpick_icon, relief="flat")
+        self.bucket_button.config(image=self.bucket_icon, relief="flat")
+        self.text_button.config(image=self.text_icon, relief="flat")
+        self.save_button.config(image=self.save_icon, relief="flat")
+        self.download_button.config(image=self.download_icon, relief="flat")
+        self.open_button.config(image=self.open_icon, relief="flat")
+
+    
     def move_mode(self):
+        self.action = "Move"
+        self.update_toolbar()
         self.move_icon = self.paint_icon("Icons/arrows.png", '#646464')
         self.move_button.config(image=self.move_icon, relief="groove")
         pass
     
     def point_mode(self):
         self.action = "Point"
+        self.update_toolbar()
         self.point_icon = self.paint_icon("Icons/pen-clip.png", '#646464')
         self.point_button.config(image=self.point_icon, relief="groove")
         pass
     
     def erase_mode(self):
         self.action = "Erase"
+        self.update_toolbar()
         self.erase_icon = self.paint_icon("Icons/eraser.png", '#646464')
         self.erase_button.config(image=self.erase_icon, relief="groove")
         pass
