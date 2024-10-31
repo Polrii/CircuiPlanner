@@ -153,24 +153,24 @@ class PixelArtApp:
         self.open_button.config(image=self.icons['open'][1], relief="flat")
         
 
-        def paint_pixel(self, event):
-            if 0 < event.x < COL_NUM * PIXEL_SIZE and 0 < event.y < ROW_NUM * PIXEL_SIZE:
-                """Paint a pixel on the canvas and store its color in the grid."""
-                x, y = event.x // PIXEL_SIZE, event.y // PIXEL_SIZE
-                self.canvas.create_rectangle(
-                    x * PIXEL_SIZE, y * PIXEL_SIZE,
-                    (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
-                    fill=self.color, outline=self.color
-                )
-                self.pixel_colors[y][x] = self.color
+    def paint_pixel(self, pos):
+        if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
+            """Paint a pixel on the canvas and store its color in the grid."""
+            x, y = pos[0] // PIXEL_SIZE, pos[1] // PIXEL_SIZE
+            self.canvas.create_rectangle(
+                x * PIXEL_SIZE, y * PIXEL_SIZE,
+                (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
+                fill=self.color, outline=self.color
+            )
+            self.pixel_colors[y][x] = self.color
 
 
-    def erase_pixel(self, event):
+    def erase_pixel(self, pos):
         self.erase_icon = self.paint_icon("Icons/eraser.png", '#646464')
         self.erase_button.config(image=self.erase_icon, relief="groove")
-        if 0 < event.x < COL_NUM * PIXEL_SIZE and 0 < event.y < ROW_NUM * PIXEL_SIZE:
+        if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
             """Erase a pixel from the canvas by setting it to transparent."""
-            x, y = event.x // PIXEL_SIZE, event.y // PIXEL_SIZE
+            x, y = pos[0] // PIXEL_SIZE, pos[1] // PIXEL_SIZE
             # Draw over the pixel with the background color
             bg_color = "#D3D3D3" if (x + y) % 2 == 0 else "#FFFFFF"
             self.canvas.create_rectangle(
@@ -180,6 +180,37 @@ class PixelArtApp:
             )
             # Set pixel to transparent in the data grid
             self.pixel_colors[y][x] = None
+    
+    
+    def preview_line(self, pos):
+        pass
+    
+    
+    def draw_line(self, pos):
+        if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
+            
+            if abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]): # Vertical line
+                if self.line_start[1] < pos[1]:
+                    a, b = self.line_start[1]-20, pos[1]
+                else:
+                    a, b = pos[1]-20, self.line_start[1]
+                    
+                for posy in range(a, b):
+                    if posy % 20 == 0:
+                        self.paint_pixel((self.line_start[0], posy))
+                        
+                        
+            else: # Horizontal line
+                if self.line_start[0] < pos[0]:
+                    a, b = self.line_start[0]-20, pos[0]
+                else:
+                    a, b = pos[0]-20, self.line_start[0]
+                    
+                for posx in range(a, b):
+                    if posx % 20 == 0:
+                        self.paint_pixel((posx, self.line_start[1]))
+            
+            self.line_start = None
 
     
     def move_mode(self):
@@ -216,6 +247,7 @@ class PixelArtApp:
         self.action = "Line"
         self.update_toolbar()
         self.line_button.config(image=self.icons['line'][2], relief="groove")
+        self.line_start = None
         pass
     
     def add_mode(self):
@@ -270,9 +302,15 @@ class PixelArtApp:
     def left_mouse_click(self, event):
         action = self.action
         if action == "Point":
-            self.paint_pixel(event)
+            self.paint_pixel((event.x, event.y))
         elif action == "Erase":
-            self.erase_pixel(event)
+            self.erase_pixel((event.x, event.y))
+        elif action == "Line":
+            if not self.line_start:
+                self.line_start = event.x, event.y
+                self.preview_line((event.x, event.y))
+            else:
+                self.draw_line((event.x, event.y))
     
     
     def mid_mouse_click(self, event):
@@ -294,9 +332,9 @@ class PixelArtApp:
     def left_mouse_hold(self, event):
         action = self.action
         if action == "Point":
-            self.paint_pixel(event)
+            self.paint_pixel((event.x, event.y))
         elif action == "Erase":
-            self.erase_pixel(event)
+            self.erase_pixel((event.x, event.y))
     
     
     def mid_mouse_hold(self, event):
