@@ -195,7 +195,8 @@ class PixelArtApp:
             self.previous_line = []
             
             """Draw a temporary line"""
-            if abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]): # Vertical line
+            if (abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]) and 
+                abs(self.line_start[0] - pos[0]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Vertical line
                 if self.line_start[1] < pos[1]:
                     a, b = self.line_start[1]-20, pos[1]
                 else:
@@ -207,7 +208,8 @@ class PixelArtApp:
                         self.paint_pixel((self.line_start[0], posy))
                         
                         
-            else: # Horizontal line
+            elif (abs(self.line_start[1] - pos[1]) < abs(self.line_start[0] - pos[0]) and 
+                  abs(self.line_start[1] - pos[1]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Horizontal line
                 if self.line_start[0] < pos[0]:
                     a, b = self.line_start[0]-20, pos[0]
                 else:
@@ -217,12 +219,27 @@ class PixelArtApp:
                     if posx % 20 == 0:
                         self.previous_line.append([posx, self.line_start[1], self.pixel_colors[self.line_start[1] // PIXEL_SIZE][posx // PIXEL_SIZE]])
                         self.paint_pixel((posx, self.line_start[1]))
-
+            
+            else: # Diagonal line
+                relative_pos = (pos[0]-self.line_start[0], pos[1]-self.line_start[1])
+                try:
+                    multx, multy = relative_pos[0]/abs(relative_pos[0]), relative_pos[1]/abs(relative_pos[1])
+                except ZeroDivisionError:
+                    multx, multy = 1, 1
+                deviation = (abs(relative_pos[0]) + abs(relative_pos[1]))/2
+                current_deviation = 0
+                while current_deviation <= deviation:
+                    pointx, pointy = int(self.line_start[0]+(current_deviation*multx)), int(self.line_start[1]+(current_deviation*multy))
+                    self.previous_line.append([pointx, pointy, self.pixel_colors[pointy // PIXEL_SIZE][pointx // PIXEL_SIZE]])
+                    self.paint_pixel((pointx, pointy))
+                    current_deviation += 20
+                
     
     def draw_line(self, pos):
         if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
             
-            if abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]): # Vertical line
+            if (abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]) and 
+                abs(self.line_start[0] - pos[0]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Vertical line
                 if self.line_start[1] < pos[1]:
                     a, b = self.line_start[1]-20, pos[1]
                 else:
@@ -230,10 +247,10 @@ class PixelArtApp:
                     
                 for posy in range(a, b):
                     if posy % 20 == 0:
-                        self.paint_pixel((self.line_start[0], posy))
+                        self.paint_pixel((self.line_start[0], posy))          
                         
-                        
-            else: # Horizontal line
+            elif (abs(self.line_start[1] - pos[1]) < abs(self.line_start[0] - pos[0]) and 
+                  abs(self.line_start[1] - pos[1]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Horizontal line
                 if self.line_start[0] < pos[0]:
                     a, b = self.line_start[0]-20, pos[0]
                 else:
@@ -242,6 +259,19 @@ class PixelArtApp:
                 for posx in range(a, b):
                     if posx % 20 == 0:
                         self.paint_pixel((posx, self.line_start[1]))
+            
+            else: # Diagonal line
+                relative_pos = (pos[0]-self.line_start[0], pos[1]-self.line_start[1])
+                try:
+                    multx, multy = relative_pos[0]/abs(relative_pos[0]), relative_pos[1]/abs(relative_pos[1])
+                except ZeroDivisionError:
+                    multx, multy = 1, 1
+                deviation = (abs(relative_pos[0]) + abs(relative_pos[1]))/2
+                current_deviation = 0
+                while current_deviation <= deviation:
+                    pointx, pointy = int(self.line_start[0]+(current_deviation*multx)), int(self.line_start[1]+(current_deviation*multy))
+                    self.paint_pixel((pointx, pointy))
+                    current_deviation += 20
             
             self.line_start = None
 
