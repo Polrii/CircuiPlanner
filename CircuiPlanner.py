@@ -8,6 +8,8 @@ from PIL import Image, ImageTk, ImageDraw, ImageColor
 COL_NUM = 80
 ROW_NUM = 40
 PIXEL_SIZE = 20  # Size of each square in pixels
+MIN_PIXEL_SIZE = 5   # Minimum pixel size for zoom-out limit
+MAX_PIXEL_SIZE = 40  # Maximum pixel size for zoom-in limit
 
 class PixelArtApp:
     def __init__(self, root):
@@ -85,8 +87,7 @@ class PixelArtApp:
         self.canvas.bind("<Button-1>", self.left_mouse_click)
         self.canvas.bind("<Button-2>", self.mid_mouse_click)
         self.canvas.bind("<Button-3>", self.right_mouse_click) 
-        self.canvas.bind("<Button-4>", self.scroll_up) 
-        self.canvas.bind("<Button-5>", self.scroll_down) 
+        self.canvas.bind("<MouseWheel>", self.scroll_action)
         self.canvas.bind("<Motion>", self.mouse_move) 
         self.canvas.bind("<B1-Motion>", self.left_mouse_hold)
         self.canvas.bind("<B2-Motion>", self.mid_mouse_hold)
@@ -117,6 +118,17 @@ class PixelArtApp:
                     (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
                     fill=color, outline=color
                 )
+    
+    
+    def update_canvas(self):
+        # Resize the canvas according to the new PIXEL_SIZE
+        self.canvas.config(width=COL_NUM * PIXEL_SIZE, height=ROW_NUM * PIXEL_SIZE)
+        self.draw_background()
+        for y in range(ROW_NUM):
+            for x in range(COL_NUM):
+                color = self.pixel_colors[y][x]
+                if color:
+                    self.paint_pixel((x * PIXEL_SIZE, y * PIXEL_SIZE), color)
 
     
     def paint_icon(self, path, color):
@@ -198,12 +210,12 @@ class PixelArtApp:
             if (abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]) and 
                 abs(self.line_start[0] - pos[0]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Vertical line
                 if self.line_start[1] < pos[1]:
-                    a, b = self.line_start[1]-20, pos[1]
+                    a, b = self.line_start[1]-PIXEL_SIZE, pos[1]
                 else:
-                    a, b = pos[1]-20, self.line_start[1]
+                    a, b = pos[1]-PIXEL_SIZE, self.line_start[1]
                     
                 for posy in range(a, b):
-                    if posy % 20 == 0:
+                    if posy % PIXEL_SIZE == 0:
                         self.previous_line.append([self.line_start[0], posy, self.pixel_colors[posy // PIXEL_SIZE][self.line_start[0] // PIXEL_SIZE]])
                         self.paint_pixel((self.line_start[0], posy))
                         
@@ -211,12 +223,12 @@ class PixelArtApp:
             elif (abs(self.line_start[1] - pos[1]) < abs(self.line_start[0] - pos[0]) and 
                   abs(self.line_start[1] - pos[1]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Horizontal line
                 if self.line_start[0] < pos[0]:
-                    a, b = self.line_start[0]-20, pos[0]
+                    a, b = self.line_start[0]-PIXEL_SIZE, pos[0]
                 else:
-                    a, b = pos[0]-20, self.line_start[0]
+                    a, b = pos[0]-PIXEL_SIZE, self.line_start[0]
                     
                 for posx in range(a, b):
-                    if posx % 20 == 0:
+                    if posx % PIXEL_SIZE == 0:
                         self.previous_line.append([posx, self.line_start[1], self.pixel_colors[self.line_start[1] // PIXEL_SIZE][posx // PIXEL_SIZE]])
                         self.paint_pixel((posx, self.line_start[1]))
             
@@ -232,7 +244,7 @@ class PixelArtApp:
                     pointx, pointy = int(self.line_start[0]+(current_deviation*multx)), int(self.line_start[1]+(current_deviation*multy))
                     self.previous_line.append([pointx, pointy, self.pixel_colors[pointy // PIXEL_SIZE][pointx // PIXEL_SIZE]])
                     self.paint_pixel((pointx, pointy))
-                    current_deviation += 20
+                    current_deviation += PIXEL_SIZE
                 
     
     def draw_line(self, pos):
@@ -241,23 +253,23 @@ class PixelArtApp:
             if (abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]) and 
                 abs(self.line_start[0] - pos[0]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Vertical line
                 if self.line_start[1] < pos[1]:
-                    a, b = self.line_start[1]-20, pos[1]
+                    a, b = self.line_start[1]-PIXEL_SIZE, pos[1]
                 else:
-                    a, b = pos[1]-20, self.line_start[1]
+                    a, b = pos[1]-PIXEL_SIZE, self.line_start[1]
                     
                 for posy in range(a, b):
-                    if posy % 20 == 0:
+                    if posy % PIXEL_SIZE == 0:
                         self.paint_pixel((self.line_start[0], posy))          
                         
             elif (abs(self.line_start[1] - pos[1]) < abs(self.line_start[0] - pos[0]) and 
                   abs(self.line_start[1] - pos[1]) < abs(abs(self.line_start[0] - pos[0]) - abs(self.line_start[1] - pos[1])) ): # Horizontal line
                 if self.line_start[0] < pos[0]:
-                    a, b = self.line_start[0]-20, pos[0]
+                    a, b = self.line_start[0]-PIXEL_SIZE, pos[0]
                 else:
-                    a, b = pos[0]-20, self.line_start[0]
+                    a, b = pos[0]-PIXEL_SIZE, self.line_start[0]
                     
                 for posx in range(a, b):
-                    if posx % 20 == 0:
+                    if posx % PIXEL_SIZE == 0:
                         self.paint_pixel((posx, self.line_start[1]))
             
             else: # Diagonal line
@@ -271,7 +283,7 @@ class PixelArtApp:
                 while current_deviation <= deviation:
                     pointx, pointy = int(self.line_start[0]+(current_deviation*multx)), int(self.line_start[1]+(current_deviation*multy))
                     self.paint_pixel((pointx, pointy))
-                    current_deviation += 20
+                    current_deviation += PIXEL_SIZE
             
             self.line_start = None
 
@@ -311,7 +323,6 @@ class PixelArtApp:
         self.update_toolbar()
         self.line_button.config(image=self.icons['line'][2], relief="groove")
         self.line_start = None
-        pass
     
     def add_mode(self):
         self.action = "Add"
@@ -386,12 +397,14 @@ class PixelArtApp:
         pass
     
     
-    def scroll_up(self, event):
-        pass
-    
-    
-    def scroll_down(self, event):
-        pass
+    def scroll_action(self, event):
+        global PIXEL_SIZE
+        if event.delta > 0 and PIXEL_SIZE < MAX_PIXEL_SIZE:  # Scroll up (zoom in)
+            PIXEL_SIZE += 2  # Adjust zoom increment as needed
+            self.update_canvas()
+        elif event.delta < 0 and PIXEL_SIZE > MIN_PIXEL_SIZE:  # Scroll down (zoom out)
+            PIXEL_SIZE -= 2  # Adjust zoom increment as needed
+            self.update_canvas()
     
     
     def mouse_move(self, event):
