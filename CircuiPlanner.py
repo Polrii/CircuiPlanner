@@ -87,6 +87,7 @@ class PixelArtApp:
         self.canvas.bind("<Button-3>", self.right_mouse_click) 
         self.canvas.bind("<Button-4>", self.scroll_up) 
         self.canvas.bind("<Button-5>", self.scroll_down) 
+        self.canvas.bind("<Motion>", self.mouse_move) 
         self.canvas.bind("<B1-Motion>", self.left_mouse_hold)
         self.canvas.bind("<B2-Motion>", self.mid_mouse_hold)
         self.canvas.bind("<B3-Motion>", self.right_mouse_hold)
@@ -153,21 +154,21 @@ class PixelArtApp:
         self.open_button.config(image=self.icons['open'][1], relief="flat")
         
 
-    def paint_pixel(self, pos):
+    def paint_pixel(self, pos, color=None):
+        if not color:
+            color = self.color
         if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
             """Paint a pixel on the canvas and store its color in the grid."""
             x, y = pos[0] // PIXEL_SIZE, pos[1] // PIXEL_SIZE
             self.canvas.create_rectangle(
                 x * PIXEL_SIZE, y * PIXEL_SIZE,
                 (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
-                fill=self.color, outline=self.color
+                fill=color, outline=color
             )
-            self.pixel_colors[y][x] = self.color
+            self.pixel_colors[y][x] = color
 
 
     def erase_pixel(self, pos):
-        self.erase_icon = self.paint_icon("Icons/eraser.png", '#646464')
-        self.erase_button.config(image=self.erase_icon, relief="groove")
         if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
             """Erase a pixel from the canvas by setting it to transparent."""
             x, y = pos[0] // PIXEL_SIZE, pos[1] // PIXEL_SIZE
@@ -183,8 +184,40 @@ class PixelArtApp:
     
     
     def preview_line(self, pos):
-        pass
-    
+        if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
+            """Erase the previous line"""
+            if self.previous_line != []:
+                for pixel in self.previous_line:
+                    if not pixel[2]:
+                        self.erase_pixel((pixel[0], pixel[1]))
+                    else:
+                        self.paint_pixel((pixel[0], pixel[1]), pixel[2])
+            self.previous_line = []
+            
+            """Draw a temporary line"""
+            if abs(self.line_start[0] - pos[0]) < abs(self.line_start[1] - pos[1]): # Vertical line
+                if self.line_start[1] < pos[1]:
+                    a, b = self.line_start[1]-20, pos[1]
+                else:
+                    a, b = pos[1]-20, self.line_start[1]
+                    
+                for posy in range(a, b):
+                    if posy % 20 == 0:
+                        self.previous_line.append([self.line_start[0], posy, self.pixel_colors[posy // PIXEL_SIZE][self.line_start[0] // PIXEL_SIZE]])
+                        self.paint_pixel((self.line_start[0], posy))
+                        
+                        
+            else: # Horizontal line
+                if self.line_start[0] < pos[0]:
+                    a, b = self.line_start[0]-20, pos[0]
+                else:
+                    a, b = pos[0]-20, self.line_start[0]
+                    
+                for posx in range(a, b):
+                    if posx % 20 == 0:
+                        self.previous_line.append([posx, self.line_start[1], self.pixel_colors[self.line_start[1] // PIXEL_SIZE][posx // PIXEL_SIZE]])
+                        self.paint_pixel((posx, self.line_start[1]))
+
     
     def draw_line(self, pos):
         if 0 < pos[0] < COL_NUM * PIXEL_SIZE and 0 < pos[1] < ROW_NUM * PIXEL_SIZE:
@@ -307,10 +340,12 @@ class PixelArtApp:
             self.erase_pixel((event.x, event.y))
         elif action == "Line":
             if not self.line_start:
+                self.previous_line = []
                 self.line_start = event.x, event.y
                 self.preview_line((event.x, event.y))
             else:
                 self.draw_line((event.x, event.y))
+                self.previous_line = []
     
     
     def mid_mouse_click(self, event):
@@ -327,6 +362,13 @@ class PixelArtApp:
     
     def scroll_down(self, event):
         pass
+    
+    
+    def mouse_move(self, event):
+        action = self.action
+        if action == "Line":
+            if self.line_start:
+                self.preview_line((event.x, event.y))
     
     
     def left_mouse_hold(self, event):
