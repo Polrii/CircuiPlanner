@@ -8,8 +8,11 @@ from PIL import Image, ImageTk, ImageDraw, ImageColor
 COL_NUM = 180
 ROW_NUM = 140
 PIXEL_SIZE = 10  # Size of each square in pixels
-MIN_PIXEL_SIZE = 4   # Minimum pixel size for zoom-out limit
+MIN_PIXEL_SIZE = 2   # Minimum pixel size for zoom-out limit
 MAX_PIXEL_SIZE = 20  # Maximum pixel size for zoom-in limit
+CANVAS_X = 0
+CANVAS_Y = 0
+
 
 class PixelArtApp:
     def __init__(self, root):
@@ -19,6 +22,8 @@ class PixelArtApp:
         
         self.color = "#000000"  # Default color (black)
         self.action = "Point"
+        
+        self.previous_pos = None
 
         """Create the toolbar."""
         # Create toolbar on the left
@@ -88,6 +93,7 @@ class PixelArtApp:
         # Event bindings for canvas
         self.canvas.bind("<Button-1>", self.left_mouse_click)
         self.canvas.bind("<Button-2>", self.mid_mouse_click)
+        self.canvas.bind("<ButtonRelease-2>", self.mid_mouse_release)
         self.canvas.bind("<Button-3>", self.right_mouse_click) 
         self.canvas.bind("<MouseWheel>", self.scroll_action)
         self.canvas.bind("<Motion>", self.mouse_move) 
@@ -107,19 +113,28 @@ class PixelArtApp:
         for icon in self.icons:
             self.icons[icon].append(ImageTk.PhotoImage(Image.open(f"Icons/{self.icons[icon][0]}.png")))
             self.icons[icon].append(self.paint_icon(f"Icons/{self.icons[icon][0]}.png", '#646464'))
-
+    
+    
+    def make_background(self, width, height):
+        bgs_list = os.listdir("Backgrounds")
+        if f"{width}x{height}.png" not in bgs_list:
+            image = Image.new("RGB", (width, height), (255, 255, 255))
+            for y in range(height):
+                for x in range(width):
+                    color = (211, 211, 211) if (x + y) % 2 == 0 else (255, 255, 255)
+                    image.putpixel((x, y), color)
+                    
+            image.save(f"Backgrounds/{width}x{height}.png")
 
 
     def draw_background(self):
-        """Draw a checkered background on the canvas."""
-        for y in range(ROW_NUM):
-            for x in range(COL_NUM):
-                color = "#D3D3D3" if (x + y) % 2 == 0 else "#FFFFFF"  # Alternate between light gray and white
-                self.canvas.create_rectangle(
-                    x * PIXEL_SIZE, y * PIXEL_SIZE,
-                    (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
-                    fill=color, outline=color
-                )
+        self.make_background(COL_NUM, ROW_NUM)
+        image = Image.open(f"Backgrounds/{COL_NUM}x{ROW_NUM}.png")
+        resized_image = image.resize((COL_NUM * PIXEL_SIZE, ROW_NUM * PIXEL_SIZE), Image.NEAREST)
+        self.bg_image = ImageTk.PhotoImage(resized_image)
+        
+        self.canvas.delete("all")
+        self.canvas.create_image(CANVAS_X, CANVAS_Y, anchor="nw", image=self.bg_image)
     
     
     def update_canvas(self):
@@ -131,6 +146,30 @@ class PixelArtApp:
                 color = self.pixel_colors[y][x]
                 if color:
                     self.paint_pixel((x * PIXEL_SIZE, y * PIXEL_SIZE), color)
+                    
+    
+    def move_background(self, pos):
+        global CANVAS_X
+        global CANVAS_Y
+        
+        if self.previous_pos is not None:
+            CANVAS_X += (pos[0]-self.previous_pos[0])
+            CANVAS_Y += (pos[1]-self.previous_pos[1])
+            self.update_canvas()
+            self.previous_pos = pos
+        else:
+            self.previous_pos = pos
+        
+        
+        
+        """
+        try:
+            CANVAS_X += (pos[0]-self.previous_pos[0])
+            CANVAS_Y += (pos[1]-self.previous_pos[1])
+            self.draw_background()
+            self.previous_pos = pos
+        except AttributeError or TypeError:
+            self.previous_pos = pos"""
 
     
     def paint_icon(self, path, color):
@@ -395,6 +434,10 @@ class PixelArtApp:
         pass
     
     
+    def mid_mouse_release(self, event):
+        self.previous_pos = None
+    
+    
     def right_mouse_click(self, event):
         pass
     
@@ -425,7 +468,7 @@ class PixelArtApp:
     
     
     def mid_mouse_hold(self, event):
-        pass
+        self.move_background((event.x, event.y))
     
     
     def right_mouse_hold(self, event):
