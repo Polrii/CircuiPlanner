@@ -25,51 +25,51 @@ class PixelArtApp:
         self.load_icons()
         
         # Move button
-        self.move_button = tk.Button(self.toolbar, image=self.move_icon, command=self.move_mode, bg="lightgray", relief="flat")
+        self.move_button = tk.Button(self.toolbar, image=self.icons['move'][1], command=self.move_mode, bg="lightgray", relief="flat")
         self.move_button.pack(padx=4, pady=10)
         
         # Point button
-        self.point_button = tk.Button(self.toolbar, image=self.point_icon, command=self.point_mode, bg="lightgray", relief="groove")
+        self.point_button = tk.Button(self.toolbar, image=self.icons['point'][2], command=self.point_mode, bg="lightgray", relief="groove")
         self.point_button.pack(padx=4, pady=10)
         
         # Add button
-        self.add_button = tk.Button(self.toolbar, image=self.add_icon, command=self.add_mode, bg="lightgray", relief="flat")
+        self.add_button = tk.Button(self.toolbar, image=self.icons['add'][1], command=self.add_mode, bg="lightgray", relief="flat")
         self.add_button.pack(padx=4, pady=10)
         
         # Line button
-        self.line_button = tk.Button(self.toolbar, image=self.line_icon, command=self.line_mode, bg="lightgray", relief="flat")
+        self.line_button = tk.Button(self.toolbar, image=self.icons['line'][1], command=self.line_mode, bg="lightgray", relief="flat")
         self.line_button.pack(padx=4, pady=10)
         
         # Erase button
-        self.erase_button = tk.Button(self.toolbar, image=self.erase_icon, command=self.erase_mode, bg="lightgray", relief="flat")
+        self.erase_button = tk.Button(self.toolbar, image=self.icons['erase'][1], command=self.erase_mode, bg="lightgray", relief="flat")
         self.erase_button.pack(padx=4, pady=10)
         
         # Color selection button
-        self.color_button = tk.Button(self.toolbar, image=self.color_icon, command=self.choose_color, bg="lightgray", relief="flat")
+        self.color_button = tk.Button(self.toolbar, image=self.icons['color'][1], command=self.choose_color, bg="lightgray", relief="flat")
         self.color_button.pack(padx=4, pady=10)
         
         # Colorpick button
-        self.colorpick_button = tk.Button(self.toolbar, image=self.colorpick_icon, command=self.colorpick_mode, bg="lightgray", relief="flat")
+        self.colorpick_button = tk.Button(self.toolbar, image=self.icons['colorpick'][1], command=self.colorpick_mode, bg="lightgray", relief="flat")
         self.colorpick_button.pack(padx=4, pady=10)
         
         # Bucket button
-        self.bucket_button = tk.Button(self.toolbar, image=self.bucket_icon, command=self.bucket_mode, bg="lightgray", relief="flat")
+        self.bucket_button = tk.Button(self.toolbar, image=self.icons['bucket'][1], command=self.bucket_mode, bg="lightgray", relief="flat")
         self.bucket_button.pack(padx=4, pady=10)
         
         # Text button
-        self.text_button = tk.Button(self.toolbar, image=self.text_icon, command=self.text_mode, bg="lightgray", relief="flat")
+        self.text_button = tk.Button(self.toolbar, image=self.icons['text'][1], command=self.text_mode, bg="lightgray", relief="flat")
         self.text_button.pack(padx=4, pady=10)
         
         # Save button
-        self.save_button = tk.Button(self.toolbar, image=self.save_icon, command=self.save_image, bg="lightgray", relief="flat")
+        self.save_button = tk.Button(self.toolbar, image=self.icons['save'][1], command=self.save_image, bg="lightgray", relief="flat")
         self.save_button.pack(padx=4, pady=10)
         
         # Download button
-        self.download_button = tk.Button(self.toolbar, image=self.download_icon, command=self.download_image, bg="lightgray", relief="flat")
+        self.download_button = tk.Button(self.toolbar, image=self.icons['download'][1], command=self.download_image, bg="lightgray", relief="flat")
         self.download_button.pack(padx=4, pady=10)
         
         # Open button
-        self.open_button = tk.Button(self.toolbar, image=self.open_icon, command=self.open_file, bg="lightgray", relief="flat")
+        self.open_button = tk.Button(self.toolbar, image=self.icons['open'][1], command=self.open_file, bg="lightgray", relief="flat")
         self.open_button.pack(padx=4, pady=10)
         
         
@@ -96,19 +96,14 @@ class PixelArtApp:
         
     def load_icons(self):
         """Load the icons for the toolbar."""
-        # Load color icon from the specified file path
-        self.move_icon = ImageTk.PhotoImage(Image.open("Icons/arrows.png"))
-        self.save_icon = ImageTk.PhotoImage(Image.open("Icons/disk.png"))
-        self.download_icon = ImageTk.PhotoImage(Image.open("Icons/download.png"))
-        self.erase_icon = ImageTk.PhotoImage(Image.open("Icons/eraser.png"))
-        self.colorpick_icon = ImageTk.PhotoImage(Image.open("Icons/eye-dropper.png"))
-        self.bucket_icon = ImageTk.PhotoImage(Image.open("Icons/fill.png"))
-        self.color_icon = ImageTk.PhotoImage(Image.open("Icons/palette.png"))
-        self.line_icon = ImageTk.PhotoImage(Image.open("Icons/plug-connection.png"))
-        self.point_icon = ImageTk.PhotoImage(Image.open("Icons/pen-clip.png"))
-        self.add_icon = ImageTk.PhotoImage(Image.open("Icons/plus-hexagon.png"))
-        self.open_icon = ImageTk.PhotoImage(Image.open("Icons/subfolder.png"))
-        self.text_icon = ImageTk.PhotoImage(Image.open("Icons/text.png"))
+        self.icons = {'move': ["arrows"], 'save': ["disk"], 'download': ["download"], 'erase': ["eraser"], 'colorpick': ["eye-dropper"], 
+                      'bucket': ["fill"], 'color': ["palette"], 'line': ["plug-connection"], 'point': ["pen-clip"], 'add': ["plus-hexagon"], 
+                      'open': ["subfolder"], 'text': ["text"], }
+        
+        for icon in self.icons:
+            self.icons[icon].append(ImageTk.PhotoImage(Image.open(f"Icons/{self.icons[icon][0]}.png")))
+            self.icons[icon].append(self.paint_icon(f"Icons/{self.icons[icon][0]}.png", '#646464'))
+
 
 
     def draw_background(self):
@@ -145,80 +140,30 @@ class PixelArtApp:
     
     
     def update_toolbar(self):
-        self.load_icons()
+        self.move_button.config(image=self.icons['move'][1], relief="flat")
+        self.point_button.config(image=self.icons['point'][1], relief="flat")
+        self.add_button.config(image=self.icons['add'][1], relief="flat")
+        self.line_button.config(image=self.icons['line'][1], relief="flat")
+        self.erase_button.config(image=self.icons['erase'][1], relief="flat")
+        self.colorpick_button.config(image=self.icons['colorpick'][1], relief="flat")
+        self.bucket_button.config(image=self.icons['bucket'][1], relief="flat")
+        self.text_button.config(image=self.icons['text'][1], relief="flat")
+        self.save_button.config(image=self.icons['save'][1], relief="flat")
+        self.download_button.config(image=self.icons['download'][1], relief="flat")
+        self.open_button.config(image=self.icons['open'][1], relief="flat")
         
-        self.move_button.config(image=self.move_icon, relief="flat")
-        self.point_button.config(image=self.point_icon, relief="flat")
-        self.add_button.config(image=self.add_icon, relief="flat")
-        self.line_button.config(image=self.line_icon, relief="flat")
-        self.erase_button.config(image=self.erase_icon, relief="flat")
-        self.color_button.config(image=self.color_icon, relief="flat")
-        self.colorpick_button.config(image=self.colorpick_icon, relief="flat")
-        self.bucket_button.config(image=self.bucket_icon, relief="flat")
-        self.text_button.config(image=self.text_icon, relief="flat")
-        self.save_button.config(image=self.save_icon, relief="flat")
-        self.download_button.config(image=self.download_icon, relief="flat")
-        self.open_button.config(image=self.open_icon, relief="flat")
 
-    
-    def move_mode(self):
-        self.action = "Move"
-        self.update_toolbar()
-        self.move_icon = self.paint_icon("Icons/arrows.png", '#646464')
-        self.move_button.config(image=self.move_icon, relief="groove")
-        pass
-    
-    def point_mode(self):
-        self.action = "Point"
-        self.update_toolbar()
-        self.point_icon = self.paint_icon("Icons/pen-clip.png", '#646464')
-        self.point_button.config(image=self.point_icon, relief="groove")
-        pass
-    
-    def erase_mode(self):
-        self.action = "Erase"
-        self.update_toolbar()
-        self.erase_icon = self.paint_icon("Icons/eraser.png", '#646464')
-        self.erase_button.config(image=self.erase_icon, relief="groove")
-        pass
-    
-    def colorpick_mode(self):
-        pass
-    
-    def bucket_mode(self):
-        pass
-    
-    def line_mode(self):
-        pass
-    
-    def add_mode(self):
-        pass
-    
-    def open_file(self):
-        pass
-    
-    def text_mode(self):
-        pass
-    
-    def choose_color(self):
-        """Open color chooser dialog to select color."""
-        color = colorchooser.askcolor()[1]
-        if color:
-            self.color = color
-            self.color_icon = self.paint_icon("Icons/palette.png", color)#242424
-            self.color_button.config(image=self.color_icon)
+        def paint_pixel(self, event):
+            if 0 < event.x < COL_NUM * PIXEL_SIZE and 0 < event.y < ROW_NUM * PIXEL_SIZE:
+                """Paint a pixel on the canvas and store its color in the grid."""
+                x, y = event.x // PIXEL_SIZE, event.y // PIXEL_SIZE
+                self.canvas.create_rectangle(
+                    x * PIXEL_SIZE, y * PIXEL_SIZE,
+                    (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
+                    fill=self.color, outline=self.color
+                )
+                self.pixel_colors[y][x] = self.color
 
-
-    def paint_pixel(self, event):
-        if 0 < event.x < COL_NUM * PIXEL_SIZE and 0 < event.y < ROW_NUM * PIXEL_SIZE:
-            """Paint a pixel on the canvas and store its color in the grid."""
-            x, y = event.x // PIXEL_SIZE, event.y // PIXEL_SIZE
-            self.canvas.create_rectangle(
-                x * PIXEL_SIZE, y * PIXEL_SIZE,
-                (x + 1) * PIXEL_SIZE, (y + 1) * PIXEL_SIZE,
-                fill=self.color, outline=self.color
-            )
-            self.pixel_colors[y][x] = self.color
 
     def erase_pixel(self, event):
         self.erase_icon = self.paint_icon("Icons/eraser.png", '#646464')
@@ -236,6 +181,70 @@ class PixelArtApp:
             # Set pixel to transparent in the data grid
             self.pixel_colors[y][x] = None
 
+    
+    def move_mode(self):
+        self.action = "Move"
+        self.update_toolbar()
+        self.move_button.config(image=self.icons['move'][2], relief="groove")
+        pass
+    
+    def point_mode(self):
+        self.action = "Point"
+        self.update_toolbar()
+        self.point_button.config(image=self.icons['point'][2], relief="groove")
+        pass
+    
+    def erase_mode(self):
+        self.action = "Erase"
+        self.update_toolbar()
+        self.erase_button.config(image=self.icons['erase'][2], relief="groove")
+        pass
+    
+    def colorpick_mode(self):
+        self.action = "Colorpick"
+        self.update_toolbar()
+        self.colorpick_button.config(image=self.icons['colorpick'][2], relief="groove")
+        pass
+    
+    def bucket_mode(self):
+        self.action = "Bucket"
+        self.update_toolbar()
+        self.bucket_button.config(image=self.icons['bucket'][2], relief="groove")
+        pass
+    
+    def line_mode(self):
+        self.action = "Line"
+        self.update_toolbar()
+        self.line_button.config(image=self.icons['line'][2], relief="groove")
+        pass
+    
+    def add_mode(self):
+        self.action = "Add"
+        self.update_toolbar()
+        self.add_button.config(image=self.icons['add'][2], relief="groove")
+        pass
+    
+    def open_file(self):
+        self.action = "Open"
+        self.update_toolbar()
+        self.open_button.config(image=self.icons['open'][2], relief="groove")
+        pass
+    
+    def text_mode(self):
+        self.action = "Text"
+        self.update_toolbar()
+        self.text_button.config(image=self.icons['text'][2], relief="groove")
+        pass
+    
+    def choose_color(self):
+        """Open color chooser dialog to select color."""
+        color = colorchooser.askcolor()[1]
+        if color:
+            self.color = color
+            self.color_icon = self.paint_icon("Icons/palette.png", color)
+            self.color_button.config(image=self.color_icon)
+
+
     def save_image(self):
         """Save the current pixel art as a PNG file."""
         image = Image.new("RGBA", (COL_NUM, ROW_NUM), (255, 255, 255, 0))  # RGBA with transparent background
@@ -251,9 +260,10 @@ class PixelArtApp:
         print("Image saved as pixel_art.png")
         
     def download_image(self):
+        self.action = "Download"
+        self.update_toolbar()
+        self.download_button.config(image=self.icons['download'][2], relief="groove")
         pass
-    
-    
     
     
     
@@ -295,10 +305,6 @@ class PixelArtApp:
     
     def right_mouse_hold(self, event):
         pass
-    
-    
-    
-    
     
     
 
